@@ -122,7 +122,7 @@ function Main() {
         event.preventDefault();
         let modify = 0;
         for (const i in myList)  {
-          if (myList[i].produit === event.target.Nom.value) {
+          if (myList[i].produit.toLowerCase === event.target.Nom.value.toLowerCase) {
             if (event.target.Quantite.value === "")
             {
               myList[i].qte = 0;
