@@ -9,16 +9,7 @@
 }
 
 
-#liste {
-    margin : 4% 0 4% 0
-}
 
-table, th, td {
-    padding: 10px;
-    border: 1px solid black;
-    border-collapse: collapse;
-   
-}
 
 .Title {
   font-size: 2em;
@@ -60,8 +51,9 @@ button {
   color: #fff;
   border-radius: 5px;
   padding: 10px 20px;
+  margin-bottom: 10px;
+  
   text-align: center;
-  text-transform: uppercase;
   border: none;
   outline: none;
   cursor: pointer;
@@ -131,3 +123,13 @@ input[type="number"] {
   font-size: 15px;
 }
 
+#register {
+  margin: 7% 0 0 0;
+}
+
+
+#connexion {
+  display : inline-block;
+  vertical-align: top;
+  padding-right: 1%;
+}

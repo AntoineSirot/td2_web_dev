@@ -14,8 +14,6 @@ function Main() {
     let [myList, setStoredData] = useState([]);
 
 
-
-
     useEffect(() => {
       const newList = localStorage.getItem('sequence')
       if (newList) {
@@ -53,6 +51,9 @@ function Main() {
       {
         const response = await fetch(api_url + "register");
         const data = await response.json();
+        for (let i in data.courses) {
+          data.courses[i].produit = data.courses[i].produit.toString().toLowerCase();
+        }
         localStorage.setItem('myList', JSON.stringify(data.courses));
         localStorage.setItem('oldList', JSON.stringify(data.courses))
         setId(data.id);
@@ -70,25 +71,48 @@ function Main() {
       async function letsSynchronize() 
       {
         let changes = {"chg":[],"sequence":(parseInt(sequence) + 1).toString()};
+        let products = [];
+        let oldProducts = [];
+
 
         for (let i in myList) {
-          if (!oldList[i]) 
-          {
-              let newQty = "+" + myList[i].qte.toString();
-              changes.chg.push({"produit":myList[i].produit,"qte":newQty});
-          } 
-          else if (parseInt(myList[i].qte) !== parseInt(oldList[i].qte)) 
-          {
-              let diff = parseInt(myList[i].qte) - parseInt(oldList[i].qte);
-              if (diff > 0)
-              {
+          products.push(myList[i].produit);
+        }
+
+        for (let i in oldList) {
+          oldProducts.push(oldList[i].produit);
+        }
+
+     
+          for (let p in products) {
+            let inside = oldProducts.indexOf(products[p]);
+            let indexInOldList = oldProducts.indexOf(products[p]);
+            let indexInMyList = products.indexOf(products[p]);
+            if (inside === -1) {
+              let newQty = "+" + myList[indexInMyList].qte.toString();
+              changes.chg.push({"produit":myList[p].produit,"qte":newQty});
+            }
+            else if (parseInt(myList[indexInMyList].qte) !== parseInt(oldList[indexInOldList].qte)) {
+              let diff = parseInt(myList[indexInMyList].qte) - parseInt(oldList[indexInOldList].qte);
+              if (diff > 0) {
                 diff = "+" + diff.toString();
               }
-              let modProduct = myList[i].produit.toString();
+              let modProduct = myList[indexInMyList].produit.toString();
               changes.chg.push({"produit":modProduct,"qte":diff.toString()});
+            }
           }
-      }
-
+          for (let x in oldProducts) {
+            let inside = products.indexOf(oldProducts[x]);
+            if (inside === -1 && oldList[x].qte !== "0") {
+              let newQty = "-" + oldList[x].qte.toString();
+              changes.chg.push({"produit":oldList[x].produit,"qte":newQty});
+            }
+          }
+            // if the product is not in the old list, it means it's a new product
+            
+          // if the product is not in the old list, it means it's a new product
+          
+      
         changes = JSON.stringify(changes);
   
 
@@ -100,56 +124,57 @@ function Main() {
         setSequence(data.sequence);
         localStorage.setItem('sequence', JSON.stringify( data.sequence));
 
-        fetch('https://esilv.olfsoftware.fr/td5/courses', {
+        fetch('https://esilv.olfsoftware.fr/td5/courses',{
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            id: id,
-            chg: JSON.parse(changes)
-          })
-        }).then((response) => {
-          if (response.ok) {
-            response.json().then((json) => {
-              console.log(json);
-            });
-          }
-        }).catch(e=>console.log(e));
-
-        }
-
-
-      function gSubmit(event) {
-        event.preventDefault();
-        let modify = 0;
-        for (const i in myList)  {
-          if (myList[i].produit.toLowerCase === event.target.Nom.value.toLowerCase) {
-            if (event.target.Quantite.value === "")
-            {
-              myList[i].qte = 0;
-            }
-            else {
-            myList[i].qte = event.target.Quantite.value;
-            }
-            modify = 1;
-          }
-        }
-        if (modify === 0) {
-          if (event.target.Quantite.value === "")
-          {
-            event.target.Quantite.value = 0;
-          }
-          setStoredData([...myList, { produit: event.target.Nom.value, qte: event.target.Quantite.value }]);
-        }
-        else  
-        {
-          setStoredData([...myList]);
-        }
-          localStorage.setItem('myList', JSON.stringify(myList));
-
+          body: 'id=' + id + '&chg=' + changes
+        }).then((reponse) => {
+              // console.log(reponse);
+              if (reponse.ok) {
+                  reponse.json().then((json) => {
+                      console.log(json);
+            })
+              }
+          });
       }
 
-      function gDelete(event) {
-        event.preventDefault();
+    function gSubmit(nomValue, quantiteValue) {
+      let alreadyIn = 0;
+    
+      for (const i in myList)  
+      {
+        if (myList[i].produit.toString().toLowerCase() === nomValue.toString().toLowerCase()) 
+        {
+          myList[i].qte = quantiteValue;
+          if (quantiteValue === "0" || quantiteValue === "")
+          {
+            myList.splice(i, 1);
+          }
+          alreadyIn = 1;
+        }
+      }
+     
+      setStoredData([...myList]);
+    
+      if (alreadyIn === 0)
+      {
+        if (quantiteValue === "" || quantiteValue === "0")
+        {
+          window.alert("Quantité nulle, le produit n'a pas été ajouté");
+        }
+        else
+        {
+          myList.push({produit: nomValue.toString().toLowerCase(), qte: quantiteValue});
+          setStoredData([...myList]);
+        }
+      }
+      localStorage.setItem('myList', JSON.stringify(myList));
+    }
+    
+
+
+
+      function gDeleteAll() {
         setStoredData([]);
         console.log(myList);
       }
@@ -160,75 +185,95 @@ function Main() {
         document.getElementById("Quantite").value = product.qte;
       }
 
+      function gDelete(product) {
+        let allProducts = [];
+        for (let i in myList) {
+          allProducts.push(myList[i].produit);
+        }
+        let index = allProducts.indexOf(product);
+        console.log("Index : " + index)
+        myList.splice(index, 1);
+        setStoredData([...myList]);
+        localStorage.setItem('myList', JSON.stringify(myList));
+      }
 
 
+
+
+//           
 
 
 
     return (
 
-      <div class="MainContainer">
-        <div class="Header">
-         <button onClick={register}>Register</button>
-
-
-        <p class= "Title">Créer ou Modifier une liste de course : </p>
+      <div className="MainContainer">
+        <div className="Header">
+        <p className= "Title">Créer ou Modifier une liste de course : </p>
         </div>
-        <div class="Corpus">
+        <div className="Corpus">
+          <div> 
+            <span className="Title" id="connexion"> Première connexion : </span>
+            <button onClick={register} id="register">Register</button>
+
+
+          </div>
             Your id: {id}, Last sequence synchronized: {sequence}
         </div>
 
 
   
 
-        <div class="input-container">
+        <div className="input-container">
 
-        <form onSubmit={gSubmit}>
-              <label class="input-label">Produit</label>
-              <input type="text" id="Nom" class="input-field"/>
-
-              <label class="input-label">Quantite</label>
-              <input type="number" id="Quantite" class="input-field" placeholder='0'/>
-
-            <button class="add-button" type="submit">Ajouter</button> <button onClick={gDelete}>Supprimer</button>
+        <form>
+          <label className="input-label">Produit</label>
+          <input type="text" id="Nom" className="input-field" onKeyDown={(a) => {if (a.key === "Enter") {gSubmit(document.getElementById("Nom").value, document.getElementById("Quantite").value)}}} />
+          <label className="input-label">Quantite</label>
+          <input type="number" id="Quantite" className="input-field" placeholder='0' onKeyDown={(a) => { if (a.key === "Enter") {gSubmit(document.getElementById("Nom").value, document.getElementById("Quantite").value)}}} />
+          
+          <button className="add-button" type="submit" id="add" onClick={() => gSubmit(document.getElementById("Nom").value, document.getElementById("Quantite").value)}>Ajouter / Modifier</button> 
+          <button className="delete-button" type="submit" id="delete" onClick={() => gDelete(document.getElementById("Nom").value)}>Supprimer</button>
         </form>
-        <div> <button onClick={letsSynchronize} > Envoyer Liste (Futur Synchronize) </button></div>
 
-        </div>
-
-        <div>
- 
+          
           <div>
-            
+            <button onClick={() => { if (window.confirm("Are you sure you want to delete the list?")) {gDeleteAll();}}} >Supprimer la liste</button>
           </div>
+
+
         </div>
-        <div> <p class="Title">Votre liste de course :</p></div>
-        <div class="list-container">
+        <div> 
+          <button onClick={letsSynchronize} > Synchronize </button>
+        </div>
+
+
+        <div> 
+          <p className="Title">Votre liste de course :</p>
+        </div>
+        <div className="list-container">
           {
             myList.map((item, index) => 
-            (<button onClick={() => selectProduct(item)} class="list-item" key={index}>
-            {item.produit.toLowerCase()} : {item.qte}</button>)
+            (<button onClick={() => selectProduct(item)} className="list-item" key={index}>
+            {item.produit} : {item.qte}</button>)
             )
           }
         </div>
 
 
-        <div>
-          {
-          oldList.length !== 0 && ( 
+ 
           <div>
-            <div class="Title">
-              Ancienne Liste de course
+            <div className="Title">
+              Ancienne Liste de course récupérée
             </div>
-            <div class="list-container"> 
+            <div className="list-container"> 
               {
                 oldList.map((item, index) => (
-                <a class="list-item" key={index}>
+                <span className="list-item" key={index}>
                   {item.produit} : {item.qte}
-                </a>))
+                </span>))
               }
-</div></div>)}
-        </div>
+            </div>
+          </div>
 
             
 
