@@ -4,8 +4,8 @@
   align-items: center;
   background-color: #e8d6b3;
 }
-.add-button{
-  margin: 4% 0 8% 0;
+.modify-button{
+  margin: 6% 0 8% 0;
 }
 
 
@@ -68,9 +68,9 @@ button:hover {
 
 .input-container {
   border: 1px solid #ccc;
-  padding: 20px;
+  padding: 8%;
   margin : 3% 0 3% 0;
-  
+  background-color: #867d5d3c;
   display: flex;
   flex-direction: column;
   width: 25%;
@@ -104,8 +104,8 @@ input[type="number"] {
 }
 
 .list-container {
-  border: 2px solid #9a8865;
-  background-color: #ac9c7d;
+  border: 1px solid #ccc;
+  background-color: #867d5d3c;
   padding: 20px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -124,7 +124,7 @@ input[type="number"] {
 }
 
 #register {
-  margin: 7% 0 0 0;
+  margin: 8% 0 0 0;
 }
 
 
@@ -132,4 +132,9 @@ input[type="number"] {
   display : inline-block;
   vertical-align: top;
   padding-right: 1%;
+}
+
+.id {
+  font-size: 60%;
+  
 }
