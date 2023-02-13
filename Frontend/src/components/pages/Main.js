@@ -63,7 +63,6 @@ function Main() {
         let to_delete = [];
         for (let i in data.courses) {
           data.courses[i].produit = data.courses[i].produit.toString().toLowerCase();
-          console.log("QTE", data.courses[i].qte);
           if (data.courses[i].qte === "0" || data.courses[i].qte === 0) 
           {
             to_delete.push(i);
@@ -73,7 +72,6 @@ function Main() {
         let g = 0;
         for (let f in to_delete) {
           data.courses.splice(((to_delete[f]-g)), 1);
-          console.log("data.courses : " , data.courses[(to_delete[f]-g)]);
           g = g + 1;
         }
 
@@ -142,16 +140,11 @@ function Main() {
           }
         }
 
-        // changes = JSON.stringify(changes);
-        console.log("Changes : " , changes);
-        // const test = await changes.json()
-        // console.log("test : " , test.chg);
+
         
         const response = await fetch(api_url + "courses?id=" + id + "&seq=" + sequence.toString());
         const data = await response.json();
-        //setSequence(data.sequence);
-        //localStorage.setItem('sequence', JSON.stringify( data.sequence));
-        console.log("chg : ", data.chg)
+
         for (let i in data.chg)
         {
           changes.push(data.chg[i]);
@@ -223,7 +216,6 @@ function Main() {
       {
         e.preventDefault();
         setStoredData([]);
-        console.log(myList);
       }
 
 
