@@ -8,7 +8,6 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<Main />} />
-            <Route path="*" element={<NotFound />} />
         </Routes>
 
     )
