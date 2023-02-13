@@ -99,7 +99,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && $_SERVER['REQUEST_URI'] == '/courses'
 
 
     
-    exit;
-}
 
 ?>
