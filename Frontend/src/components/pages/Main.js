@@ -60,9 +60,23 @@ function Main() {
       {
         const response = await fetch(api_url + "register");
         const data = await response.json();
+        let to_delete = [];
         for (let i in data.courses) {
           data.courses[i].produit = data.courses[i].produit.toString().toLowerCase();
+          console.log("QTE", data.courses[i].qte);
+          if (data.courses[i].qte === "0" || data.courses[i].qte === 0) 
+          {
+            to_delete.push(i);
+          }
         }
+        console.log("to_delete : " , to_delete);
+        let g = 0;
+        for (let f in to_delete) {
+          data.courses.splice(((to_delete[f]-g)), 1);
+          console.log("data.courses : " , data.courses[(to_delete[f]-g)]);
+          g = g + 1;
+        }
+
         localStorage.setItem('myList', JSON.stringify(data.courses));
         localStorage.setItem('oldList', JSON.stringify(data.courses))
         setId(data.id);
@@ -73,8 +87,8 @@ function Main() {
         localStorage.setItem('id', JSON.stringify(data.id));
         localStorage.setItem('sequence', JSON.stringify( data.sequence));
         console.log("myList : " + data);
-
-
+      
+        window.location.reload();
       }
 
       // Function that will post your list on the server and return you the last list before yours
